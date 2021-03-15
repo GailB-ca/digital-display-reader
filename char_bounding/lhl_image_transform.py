@@ -10,19 +10,29 @@ from matplotlib import pyplot as plt
 import pytesseract
 
 
-def img_process(img_array, gray=True, flatten=True):
+def img_process(img_array, gray=True, flatten=True, close_erode=True, flatten_2=True):
     image = img_array.copy()
     
     if(gray):
         image = cv2.cvtColor(image.copy(), cv2.COLOR_BGR2GRAY)
-        
-    if(flatten):
-        image = cv2.threshold(image.copy(),55, 255, cv2.THRESH_BINARY_INV)[1]
-        image = 255 - image
 
-    kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (3,3))
-    result = cv2.morphologyEx(image, cv2.MORPH_OPEN, kernel, iterations=3)
-    
+    if(flatten):
+        image = cv2.adaptiveThreshold(image.copy(), 
+                                      255, 
+                                      cv2.ADAPTIVE_THRESH_GAUSSIAN_C, 
+                                      cv2.THRESH_BINARY, 
+                                      91, 2)
+        #image = cv2.threshold(image.copy(),55, 255, cv2.THRESH_BINARY_INV)[1]
+        #image = 255 - image
+
+    if(close_erode):
+        kernel = np.ones((10,10),np.uint8)
+        image = cv2.morphologyEx(image.copy(), cv2.MORPH_CLOSE, kernel) 
+        image = cv2.erode(image.copy(),kernel,iterations = 2)
+
+    if(flatten_2):
+        image = cv2.threshold(image.copy(), 100, 255, cv2.THRESH_BINARY)[1]
+
     return image
 
 def rotate(
