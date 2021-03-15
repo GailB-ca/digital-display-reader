@@ -10,7 +10,17 @@ from matplotlib import pyplot as plt
 import pytesseract
 
 
-def img_process(img_array, gray=True, flatten=True, close_erode=True, flatten_2=True):
+def img_process(img_array, gray=True, 
+                flatten=True, 
+                close_erode=True, 
+                flatten_2=True,
+                threshold_block_size=91,
+                erode_iterations=2
+               ):
+    
+    # Threshold block size should be lower values for noisey images
+    # Erode iterations should be higher for noisey images
+    
     image = img_array.copy()
     
     if(gray):
@@ -21,14 +31,18 @@ def img_process(img_array, gray=True, flatten=True, close_erode=True, flatten_2=
                                       255, 
                                       cv2.ADAPTIVE_THRESH_GAUSSIAN_C, 
                                       cv2.THRESH_BINARY, 
-                                      91, 2)
+                                      threshold_block_size, 
+                                      2)
         #image = cv2.threshold(image.copy(),55, 255, cv2.THRESH_BINARY_INV)[1]
         #image = 255 - image
 
+    # denoise = cv2.fastNlMeansDenoising(thresh,None,7,7,21)
+    
     if(close_erode):
         kernel = np.ones((10,10),np.uint8)
         image = cv2.morphologyEx(image.copy(), cv2.MORPH_CLOSE, kernel) 
-        image = cv2.erode(image.copy(),kernel,iterations = 2)
+        image = cv2.erode(image.copy(),kernel,
+                          iterations = erode_iterations)
 
     if(flatten_2):
         image = cv2.threshold(image.copy(), 100, 255, cv2.THRESH_BINARY)[1]
