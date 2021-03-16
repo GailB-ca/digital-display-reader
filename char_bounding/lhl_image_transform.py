@@ -100,3 +100,24 @@ def plot_boxes(img_array, boxes):
 def plot_image(image_array):
     plt.imshow(image_array, cmap="gray")
     plt.show()
+    
+    
+def extract_bounded_image(image_path, x_min, y_min, width, height, is_portrait=True):
+    x = x_min
+    y = y_min
+    # print("{0} co-ords x {1} - {2}".format(image_path, x, y))
+    w = width
+    h = height
+    image = cv2.imread(image_path)
+
+    if (not is_portrait):
+        # flip the image
+        image = cv2.rotate(image, cv2.ROTATE_90_COUNTERCLOCKWISE) 
+
+    num_img = image[y:y+h, x:x+w]
+
+    if (not is_portrait):
+        # flip back
+        num_img = cv2.rotate(num_img, cv2.ROTATE_90_CLOCKWISE) 
+        
+    return num_img
